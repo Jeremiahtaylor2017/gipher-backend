@@ -5,6 +5,8 @@ const cors = require("cors");
 const logger = require("morgan");
 require("dotenv").config();
 
+const userRouter = require("./controllers/user.controller");
+
 // setup
 const app = express();
 const { PORT, MONGO_URI } = process.env;
@@ -25,6 +27,8 @@ app.use(express.json());
 app.get("/", (req, res) => {
 	res.send("Gipher API");
 });
+
+app.use("/api/user", userRouter);
 
 // listener
 app.listen(PORT, () => console.log(`Listening on port: ${PORT}`));
