@@ -4,7 +4,7 @@ const router = require("express").Router();
 //index
 router.get("/", async (req, res) => {
 	try {
-		res.status(200).json(await User.find({}));
+		res.status(200).json(await User.find({ email: req.user.email }));
 	} catch (error) {
 		res.status(400).json({ message: "Bad request" });
 	}
@@ -35,6 +35,8 @@ router.put("/:id", async (req, res) => {
 
 // create
 router.post("/", async (req, res) => {
+	const { displayName, email } = req.body;
+
 	for (let key in req.body) {
 		if (req.body[key] === "") {
 			delete req.body[key];
@@ -42,9 +44,24 @@ router.post("/", async (req, res) => {
 	}
 
 	try {
-		res.status(201).json(await User.create(req.body));
+		const user = await User.find({ email: email });
+		console.log(user);
+		if (user.length > 0) {
+			res.status(200).json(user);
+		} else {
+			res.status(201).json(
+				await User.create({
+					name: displayName,
+					username: `@${displayName.split(" ").join("").toLowerCase()}`,
+					email
+				})
+			);
+		}
 	} catch (error) {
-		res.status(400).json({ message: "Bad request" });
+		console.log(error);
+		res
+			.status(400)
+			.json({ message: "Email already in use. Please choose another." });
 	}
 });
 
